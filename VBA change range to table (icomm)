@@ -1,0 +1,35 @@
+Sub CreateTable()
+
+            Dim wb As Workbook: Set wb = ActiveWorkbook
+            Dim sht As Worksheet
+            Dim tblObj As ListObject
+            Dim lr As Long, lastCol As Integer
+            Dim hd As Range
+
+    For Each sht In wb.Worksheets
+    sht.Name = Trim(sht.Name)
+    sht.Name = WorksheetFunction.Substitute(sht.Name, " ", "_")
+            
+        Application.CutCopyMode = False
+    
+        With sht
+        If .Cells(1, 1).MergeCells = True Then sht.Rows(1).EntireRow.Delete
+        
+            lr = .Range("A" & .Rows.Count).End(xlUp).Row
+            lastCol = .Cells(1, 1).End(xlToRight).Column
+            
+            If .ListObjects.Count > 0 Then
+                Set tblObj = .Range("A1").ListObject
+                tblObj.Resize .Range("A1", .Cells(lr, lastCol))
+    
+            Else
+                    Set tblObj = .ListObjects.Add(xlSrcRange, .Range("A1", .Cells(lr, lastCol)), , xlYes)
+                    tblObj.TableStyle = "TableStyleLight9"
+            End If
+                        tblObj.Name = sht.Name
+                    For Each hd In sht.Range(tblObj.HeaderRowRange.Address)
+                        hd.Value = Trim(hd)
+                        Next
+        End With
+    Next
+End Sub
